@@ -4,7 +4,6 @@ from st_aggrid import GridUpdateMode, JsCode, StAggridTheme
 from st_aggrid import AgGrid, GridOptionsBuilder
 from streamlit_echarts import st_echarts
 
-
 def component_hide_sidebar():
     st.markdown(""" 
     <style>
@@ -23,25 +22,17 @@ def component_fix_tab_echarts():
 
     return st.markdown(streamlit_style, unsafe_allow_html=True)
 
+
 def component_effect_underline():
-    st.markdown("""
-    <style>
-        .full-width-line-white {
-            width: 100%;
-            border-bottom: 1px solid #ffffff;
-            margin-bottom: 0.5em;
-        }
-        .full-width-line-black {
-            width: 100%;
-            border-bottom: 1px solid #000000;
-            margin-bottom: 0.5em;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+    if st.session_state.get("base_theme") == "dark":
+        color = "#ffffff"
+    else:
+        color = "#000000" 
+    st.markdown(
+    f"""<style>.full-width-line-white {{width: 100%;border-bottom: 1px solid {color};margin-bottom: 0.5em;}}</style>""",unsafe_allow_html=True)
 
 def component_plotDataframe_aggrid(df, name, num_columns=[], percent_columns=[], df_details=None, coluns_merge_details=None, coluns_name_details=None, key="default"):
-    st.markdown(f"<h5 style='text-align: center; background-color: #ffb131; padding: 0.1em;'>{name}</h5>", unsafe_allow_html=True)
-
+    st.markdown(f"<h5 style='text-align: center; background-color: #8B0000; color: #ffffff; padding: 0.1em;'>{name}</h5>",unsafe_allow_html=True)
     # Converter colunas selecionadas para float com limpeza de texto
     for col in num_columns:
         if col in df.columns:
@@ -182,8 +173,31 @@ def component_plotDataframe_aggrid(df, name, num_columns=[], percent_columns=[],
     if "masterDetail" not in grid_options:
         grid_options["columnDefs"] = [{"field": col} for col in df_to_show.columns]
 
-    # Tema customizado
-    custom_theme = (StAggridTheme(base="balham").withParams().withParts('colorSchemeDark'))
+    # Adicionar efeito zebra (linhas alternadas)
+    if st.session_state.get("base_theme") == "dark":
+        custom_theme = (StAggridTheme(base="balham").withParams().withParts('colorSchemeDark'))
+    # Zebra escura
+        grid_options["getRowStyle"] = JsCode('''
+        function(params) {
+            if (params.node.rowIndex % 2 === 0) {
+                return { background: '#222', color: '#fff' };
+            } else {
+                return { background: '#333', color: '#fff' };
+            }
+        }
+        ''')
+    else:
+    # Zebra clara (padrão)
+        custom_theme = (StAggridTheme(base="balham").withParams())
+        grid_options["getRowStyle"] = JsCode('''
+        function(params) {
+            if (params.node.rowIndex % 2 === 0) {
+                return { background: '#fff', color: '#111' };
+            } else {
+                return { background: '#e0e0e0', color: '#111' };
+            }
+        }
+        ''')
 
     # Mostrar AgGrid
     grid_response = AgGrid(
@@ -201,12 +215,9 @@ def component_plotDataframe_aggrid(df, name, num_columns=[], percent_columns=[],
     filtered_df = filtered_df.drop(columns=[col for col in filtered_df.columns if col.endswith('_NUM')], errors='ignore')
     return filtered_df, len(filtered_df)
 
-
-
-
 def component_plotDataframe(df, name, column_config={}):
     
-    st.markdown(f"<h5 style='text-align: center; background-color: #ffb131; padding: 0.1em;'>{name}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: center; background-color: #8B0000; color: #ffffff; padding: 0.1em;'>{name}</h5>",unsafe_allow_html=True)
     st.dataframe(df, use_container_width=True, hide_index=True, column_config=column_config)
 
     return df
@@ -214,7 +225,7 @@ def component_plotDataframe(df, name, column_config={}):
 def component_plotPizzaChart(labels, sizes, name, max_columns=8):
     chart_key = f"{labels}_{sizes}_{name}_"
     if name:
-        st.markdown(f"<h5 style='text-align: center; background-color: #ffb131; padding: 0.1em;'>{name}</h5>", unsafe_allow_html=True)
+        st.markdown(f"<h5 style='text-align: center; background-color: #8B0000; color: #ffffff; padding: 0.1em;'>{name}</h5>",unsafe_allow_html=True)
     
     # Organize os dados para mostrar apenas um número limitado de categorias
     if len(labels) > max_columns:

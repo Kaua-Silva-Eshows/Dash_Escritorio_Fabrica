@@ -2,16 +2,23 @@ import streamlit as st
 from menu.supplies import Supplies
 from utils.components import *
 from utils.user import logout
+from streamlit_theme import st_theme
 
 def render():
+
     # pegando dados da sessão como ID e NOME
     user_id = st.session_state['user_data']["data"]["user_id"]
     user_name = st.session_state['user_data']["data"]['full_name']
+    # Armazena no session_state
+    theme = st_theme(key=f"theme_")
+    base_theme = theme.get("base") if theme else "default"
+    st.session_state["base_theme"] = base_theme
+
 
     col1, col2, col3 = st.columns([3.5,0.8,0.4])
     
     col1.write(f"## Olá, "+user_name)
-    col2.image("./assets/imgs/logo_FB.png", width=200)
+    col2.image("./assets/imgs/logo_Fabrica.png", width=200)
     col3.markdown("<p style='padding-top:1.0em'></p>", unsafe_allow_html=True)
     col3.button(label="Logout", on_click=logout)
     

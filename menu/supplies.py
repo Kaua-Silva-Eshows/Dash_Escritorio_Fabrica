@@ -115,7 +115,7 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
             st.markdown('---')
 
             categoryN2_inputs = (inputs_expenses_filtered_by_cat.groupby('Insumo')[['Valor Insumo', 'Quantidade Insumo']].sum().reset_index())
-            st.write(categoryN2_inputs)
+            #st.write(categoryN2_inputs)
             categoryN2_inputs['Preco Medio'] = categoryN2_inputs['Valor Insumo'] / categoryN2_inputs['Quantidade Insumo']
             categoryN2_inputs['Percentual Repres'] = (categoryN2_inputs['Valor Insumo'] / categoryN2_inputs['Valor Insumo'].sum() * 100).round(1)
             categoryN2_inputs = categoryN2_inputs.sort_values(by='Valor Insumo', ascending=False)

@@ -74,7 +74,7 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
                 categoryN2_selected = categorias_disponiveis
             inputs_expenses_filtered_by_cat = inputsExpenses_filtered[inputsExpenses_filtered['Nivel 2'].isin(categoryN2_selected)]
             
-            st.write(inputs_expenses_filtered_by_cat)
+            #st.write(inputs_expenses_filtered_by_cat)
 
             with st.expander('Gastos por Fornecedor insumo N5', expanded=False):
                 supplierExpenseN5 = supplier_expense_n5(day_analysis, day_analysis2)
@@ -446,18 +446,23 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
                 function_format_number_columns(inputProduced_merged, columns_money=['MÉDIA PREÇO NO ITEM KG', 'VALOR PRODUÇÃO'])
                 component_plotDataframe_aggrid(itemSold_merged, 'Itens Vendidos Detalhado', df_details=inputProduced_merged, coluns_merge_details='Insumo de Estoque', coluns_name_details='EMPRESA')
 
+            st.write('---')
 
             itemSold_merged_debug = itemSold_merged_debug[['EMPRESA', 'Item Vendido', 'VALOR DO ITEM', 'CATEGORIA', 'Insumo de Estoque', 'Unidade Medida', 'Média Preço (Insumo Estoque)', 'Quantidade na Ficha']]
             itemSold_merged_debug.rename(columns={'Média Preço (Insumo Estoque)': 'Media Preço do Insumo','Quantidade na Ficha': 'Quantidade para Produção', 'VALOR DO ITEM': 'Valor Vendido'}, inplace=True)
             itemSold_merged_debug['Unidade de Medida Produção'] = itemSold_merged_debug.apply(function_format_amount, axis=1)
-
-            function_format_number_columns(itemSold_merged_debug, columns_money=['Media Preço do Insumo', 'Valor Vendido'], columns_number=['Quantidade para Produção'])
+            itemSold_merged_debug['Valor para Produção'] = itemSold_merged_debug['Media Preço do Insumo'] / itemSold_merged_debug['Quantidade para Produção']
+            function_format_number_columns(itemSold_merged_debug, columns_money=['Media Preço do Insumo', 'Valor Vendido', 'Valor para Produção'], columns_number=['Quantidade para Produção'])
             itemSold_merged_full, len_df = component_plotDataframe_aggrid(itemSold_merged_debug, 'Itens Vendidos Completo', )
             function_copy_dataframe_as_tsv(itemSold_merged_full)
             
             averageInputN5Price_n5_not_associated = averageInputN5Price_n5_not_associated[averageInputN5Price_n5_not_associated['Insumo de Estoque'].isna()]
             averageInputN5Price_null, len_df = component_plotDataframe_aggrid(averageInputN5Price_n5_not_associated, 'Insumos Sem Associação')
-            function_copy_dataframe_as_tsv(averageInputN5Price_null)
+            row_averageInputN5Price_filters = st.columns([1.8,1,1])
+            with row_averageInputN5Price_filters[0]:
+                function_copy_dataframe_as_tsv(averageInputN5Price_null)
+            with row_averageInputN5Price_filters[1]:
+                function_box_lenDf(len_df, averageInputN5Price_n5_not_associated, item='itens')
 
 class Supplies(Page):
     def render(self):

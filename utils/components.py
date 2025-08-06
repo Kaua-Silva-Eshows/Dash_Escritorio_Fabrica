@@ -5,6 +5,7 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 from streamlit_echarts import st_echarts
 
 def component_hide_sidebar():
+    #Some com a barra lateral
     st.markdown(""" 
     <style>
         section[data-testid="stSidebar"][aria-expanded="true"]{
@@ -14,6 +15,7 @@ def component_hide_sidebar():
     """, unsafe_allow_html=True)
 
 def component_fix_tab_echarts():
+    #Centraliza os graficos
     streamlit_style = """
     <style>
     iframe[title="streamlit_echarts.st_echarts"]{ height: 450px; width: 600px;} 
@@ -24,6 +26,7 @@ def component_fix_tab_echarts():
 
 
 def component_effect_underline():
+    #Cria a linha bonitinha
     if st.session_state.get("base_theme") == "dark":
         color = "#ffffff"
     else:

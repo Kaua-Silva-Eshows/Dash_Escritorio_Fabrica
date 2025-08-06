@@ -3,6 +3,7 @@ import streamlit.components.v1 as components
 import streamlit as st
 
 def function_copy_dataframe_as_tsv(df):
+    #Função de copiar o dataframe
     # Converte o DataFrame para uma string TSV
     df_tsv = df.to_csv(index=False, sep='\t')
     
@@ -62,6 +63,7 @@ def function_copy_dataframe_as_tsv(df):
     )
 
 def function_box_lenDf(len_df, df, y='', x='', box_id='', item='', total_line=False):
+    #Cria uma box para exibir inforações de quantidade de linha
     if total_line == True:
         len_df = len(df)
         len_df -= 1
@@ -106,6 +108,7 @@ def function_box_lenDf(len_df, df, y='', x='', box_id='', item='', total_line=Fa
     )
 
 def function_format_number_columns(df=None, columns_money=[], columns_number=[], columns_percent=[], valor=None):
+    #Função geral para formatar numeros
     if valor is not None:
         try:
             valor = float(valor)
@@ -153,6 +156,7 @@ def function_format_number_columns(df=None, columns_money=[], columns_number=[],
     return df
     
 def function_highlight_percentage(valuer, invert_color=False):
+    # Função para destacar as colunas de percentuais verde ou vermelho para porcentagem
     if valuer == '-' or pd.isnull(valuer):
         return ''
     
@@ -178,6 +182,7 @@ def function_highlight_percentage(valuer, invert_color=False):
             return ''
 
 def function_highlight_value(value, invert_color=False):
+    #Função para pintar valores verdes se positivos ou vermelhos se negativos
     if pd.isnull(value) or value == '':
         return ''
 
@@ -200,28 +205,9 @@ def function_highlight_value(value, invert_color=False):
     except Exception:
         return ''
         
-def format_brazilian(num):
-    if pd.isnull(num):
-        return None
-    # Primeiro formata no estilo americano
-    formatted = f"{num:,.2f}"
-    # Depois inverte vírgula e ponto
-    formatted = formatted.replace(',', 'X').replace('.', ',').replace('X', '.')
-    return formatted
-
-def format_columns_brazilian(df, numeric_columns):
-    for col in numeric_columns:
-        if col in df.columns:
-            df[col] = df[col].apply(format_brazilian)
-    return df
-
-def format_date_brazilian(df, date_column):
-  df[date_column] = pd.to_datetime(df[date_column])
-  df[date_column] = df[date_column].dt.strftime('%d-%m-%Y')
-  return df
-
-def function_format_amount(row):
-    unidade = str(row['Unidade Medida']).upper()
+def function_format_amount(df):
+    #Cria coluna de g e ml
+    unidade = str(df['Unidade Medida']).upper()
     if "KG" in unidade:
         return "G"
     elif "L" in unidade:

@@ -73,6 +73,8 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
             if not categoryN2_selected:
                 categoryN2_selected = categorias_disponiveis
             inputs_expenses_filtered_by_cat = inputsExpenses_filtered[inputsExpenses_filtered['Nivel 2'].isin(categoryN2_selected)]
+            
+            st.write(inputs_expenses_filtered_by_cat)
 
             with st.expander('Gastos por Fornecedor insumo N5', expanded=False):
                 supplierExpenseN5 = supplier_expense_n5(day_analysis, day_analysis2)
@@ -113,6 +115,7 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
             st.markdown('---')
 
             categoryN2_inputs = (inputs_expenses_filtered_by_cat.groupby('Insumo')[['Valor Insumo', 'Quantidade Insumo']].sum().reset_index())
+            st.write(categoryN2_inputs)
             categoryN2_inputs['Preco Medio'] = categoryN2_inputs['Valor Insumo'] / categoryN2_inputs['Quantidade Insumo']
             categoryN2_inputs['Percentual Repres'] = (categoryN2_inputs['Valor Insumo'] / categoryN2_inputs['Valor Insumo'].sum() * 100).round(1)
             categoryN2_inputs = categoryN2_inputs.sort_values(by='Valor Insumo', ascending=False)
@@ -278,14 +281,16 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
 
         else:
             averageInputN5Price = average_inputN5_price(day_technical_sheet.strftime('%Y-%m-%d'), day_technical_sheet2.strftime('%Y-%m-%d'))
-            averageInputN5Price_debug = averageInputN5Price.copy()
+            averageInputN5Price_n5_not_associated = averageInputN5Price.copy()
             averageInputN5Price_itemsold = averageInputN5Price.copy()
             averageInputN5Price_itemsold['QUANTIDADE DRI'] = averageInputN5Price_itemsold['QUANTIDADE DRI'].replace(['None', None, '', 'nan', 'NaN'], '0').astype(str).str.replace(',', '.', regex=False).astype(float)
             averageInputN5Price_itemsold['PROPORÇÃO ACE'] = averageInputN5Price_itemsold['PROPORÇÃO ACE'].replace(['None', None, '', 'nan', 'NaN'], '0').astype(str).str.replace(',', '.', regex=False).astype(float)
             averageInputN5Price_itemsold['Volume Total'] = averageInputN5Price_itemsold['QUANTIDADE DRI'] * averageInputN5Price_itemsold['PROPORÇÃO ACE']
-            
+            #st.write(averageInputN5Price_itemsold)
             averageInputN5Price_itemsold = averageInputN5Price_itemsold.groupby(['EMPRESA', 'Insumo de Estoque']).agg({'Volume Total': 'sum', 'VALOR DRI': 'sum'})
+            #st.write(averageInputN5Price_itemsold)
             averageInputN5Price_itemsold['Média Preço (Insumo Estoque)'] = averageInputN5Price_itemsold['VALOR DRI'].astype(str).str.replace(',', '.', regex=False).astype(float) / averageInputN5Price_itemsold['Volume Total'].astype(str).str.replace(',', '.', regex=False).astype(float)
+            #st.write(averageInputN5Price_itemsold)
             averageInputN5Price_itemsold = averageInputN5Price_itemsold.reset_index()
             averageInputN5Price_itemsold = averageInputN5Price_itemsold[['EMPRESA', 'Insumo de Estoque', 'Média Preço (Insumo Estoque)']].reindex()
 
@@ -442,10 +447,17 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
                 component_plotDataframe_aggrid(itemSold_merged, 'Itens Vendidos Detalhado', df_details=inputProduced_merged, coluns_merge_details='Insumo de Estoque', coluns_name_details='EMPRESA')
 
 
+            itemSold_merged_debug = itemSold_merged_debug[['EMPRESA', 'Item Vendido', 'VALOR DO ITEM', 'CATEGORIA', 'Insumo de Estoque', 'Unidade Medida', 'Média Preço (Insumo Estoque)', 'Quantidade na Ficha']]
+            itemSold_merged_debug.rename(columns={'Média Preço (Insumo Estoque)': 'Media Preço do Insumo','Quantidade na Ficha': 'Quantidade para Produção', 'VALOR DO ITEM': 'Valor Vendido'}, inplace=True)
+            itemSold_merged_debug['Unidade de Medida Produção'] = itemSold_merged_debug.apply(function_format_amount, axis=1)
 
-            st.write(itemSold_merged_debug)
-            st.write(averageInputN5Price_debug[averageInputN5Price_debug['Insumo de Estoque'].isna()])
-
+            function_format_number_columns(itemSold_merged_debug, columns_money=['Media Preço do Insumo', 'Valor Vendido'], columns_number=['Quantidade para Produção'])
+            itemSold_merged_full, len_df = component_plotDataframe_aggrid(itemSold_merged_debug, 'Itens Vendidos Completo', )
+            function_copy_dataframe_as_tsv(itemSold_merged_full)
+            
+            averageInputN5Price_n5_not_associated = averageInputN5Price_n5_not_associated[averageInputN5Price_n5_not_associated['Insumo de Estoque'].isna()]
+            averageInputN5Price_null, len_df = component_plotDataframe_aggrid(averageInputN5Price_n5_not_associated, 'Insumos Sem Associação')
+            function_copy_dataframe_as_tsv(averageInputN5Price_null)
 
 class Supplies(Page):
     def render(self):

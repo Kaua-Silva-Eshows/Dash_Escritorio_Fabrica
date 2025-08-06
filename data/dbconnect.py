@@ -2,18 +2,6 @@ import mysql.connector
 import streamlit as st
 import pandas as pd
 
-def get_mysql_connection_eshows():
-    mysql_config = st.secrets["mysql_eshows"]
-    # Create MySQL connection
-    conn = mysql.connector.connect(
-        host=mysql_config['host'],
-        port=mysql_config['port'],
-        database=mysql_config['database'],
-        user=mysql_config['username'],
-        password=mysql_config['password']
-    )    
-    return conn
-
 def get_mysql_connection_fabrica():
     mysql_config = st.secrets["mysql_fabrica"]
     # Create MySQL connection
@@ -26,11 +14,8 @@ def get_mysql_connection_fabrica():
     )    
     return conn
 
-def execute_query(query, use_fabrica=False):
-    conn = (
-    get_mysql_connection_fabrica() if use_fabrica 
-    else get_mysql_connection_eshows()
-)
+def execute_query(query):
+    conn = (get_mysql_connection_fabrica())
 
     cursor = conn.cursor()
     try:
@@ -62,8 +47,8 @@ def execute_query(query, use_fabrica=False):
         cursor.close()
         conn.close()
 
-def get_dataframe_from_query(consulta, use_fabrica=False):
-    result, column_names = execute_query(consulta, use_fabrica)
+def get_dataframe_from_query(consulta):
+    result, column_names = execute_query(consulta)
     if result is None or column_names is None:
         return pd.DataFrame() 
     return pd.DataFrame(result, columns=column_names)

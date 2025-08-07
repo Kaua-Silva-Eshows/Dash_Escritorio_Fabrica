@@ -287,12 +287,13 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
             averageInputN5Price_itemsold['PROPORÇÃO ACE'] = averageInputN5Price_itemsold['PROPORÇÃO ACE'].replace(['None', None, '', 'nan', 'NaN'], '0').astype(str).str.replace(',', '.', regex=False).astype(float)
             averageInputN5Price_itemsold['Volume Total'] = averageInputN5Price_itemsold['QUANTIDADE DRI'] * averageInputN5Price_itemsold['PROPORÇÃO ACE']
             #st.write(averageInputN5Price_itemsold)
-            averageInputN5Price_itemsold = averageInputN5Price_itemsold.groupby(['EMPRESA', 'Insumo de Estoque']).agg({'Volume Total': 'sum', 'VALOR DRI': 'sum'})
+            averageInputN5Price_itemsold = averageInputN5Price_itemsold.groupby(['EMPRESA', 'ID Insumo de Estoque','Insumo de Estoque']).agg({'Volume Total': 'sum', 'VALOR DRI': 'sum'})
             #st.write(averageInputN5Price_itemsold)
             averageInputN5Price_itemsold['Média Preço (Insumo Estoque)'] = averageInputN5Price_itemsold['VALOR DRI'].astype(str).str.replace(',', '.', regex=False).astype(float) / averageInputN5Price_itemsold['Volume Total'].astype(str).str.replace(',', '.', regex=False).astype(float)
             #st.write(averageInputN5Price_itemsold)
             averageInputN5Price_itemsold = averageInputN5Price_itemsold.reset_index()
-            averageInputN5Price_itemsold = averageInputN5Price_itemsold[['EMPRESA', 'Insumo de Estoque', 'Média Preço (Insumo Estoque)']].reindex()
+            #st.write(averageInputN5Price_itemsold)
+            averageInputN5Price_itemsold = averageInputN5Price_itemsold[['EMPRESA', 'ID Insumo de Estoque', 'Insumo de Estoque', 'Média Preço (Insumo Estoque)']].reindex()
 
             row_averageInputN5Price_filters = st.columns([1,1,1,1])
             with row_averageInputN5Price_filters[1]:
@@ -322,9 +323,9 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
             st.write('---')
 
             itemSold = item_sold()
-            #st.write(itemSold)
-
-            itemSold_merged = itemSold.merge(averageInputN5Price_itemsold, how='left', on=['Insumo de Estoque', 'EMPRESA'])
+            itemSold['ID Insumo de Estoque'] = itemSold['ID Insumo de Estoque'].astype(str)
+            averageInputN5Price_itemsold['ID Insumo de Estoque'] = averageInputN5Price_itemsold['ID Insumo de Estoque'].astype(str)
+            itemSold_merged = itemSold.merge(averageInputN5Price_itemsold, how='left', on=['ID Insumo de Estoque','Insumo de Estoque', 'EMPRESA'])
             itemSold_merged_debug = itemSold_merged.copy()
             
             itemSold_merged['Unidade de Medida na Ficha'] = itemSold_merged.apply(function_format_amount, axis=1)
@@ -447,8 +448,8 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
                 component_plotDataframe_aggrid(itemSold_merged, 'Itens Vendidos Detalhado', df_details=inputProduced_merged, coluns_merge_details='Insumo de Estoque', coluns_name_details='EMPRESA')
 
             st.write('---')
-
-            itemSold_merged_debug = itemSold_merged_debug[['EMPRESA', 'Item Vendido', 'VALOR DO ITEM', 'CATEGORIA', 'Insumo de Estoque', 'Unidade Medida', 'Média Preço (Insumo Estoque)', 'Quantidade na Ficha']]
+                
+            itemSold_merged_debug = itemSold_merged_debug[['EMPRESA', 'Item Vendido', 'VALOR DO ITEM', 'CATEGORIA', 'ID Insumo de Estoque','Insumo de Estoque', 'Unidade Medida', 'Média Preço (Insumo Estoque)', 'Quantidade na Ficha']]
             itemSold_merged_debug.rename(columns={'Média Preço (Insumo Estoque)': 'Media Preço do Insumo','Quantidade na Ficha': 'Quantidade para Produção', 'VALOR DO ITEM': 'Valor Vendido'}, inplace=True)
             itemSold_merged_debug['Unidade de Medida Produção'] = itemSold_merged_debug.apply(function_format_amount, axis=1)
             itemSold_merged_debug['Valor para Produção'] = itemSold_merged_debug['Media Preço do Insumo'] / itemSold_merged_debug['Quantidade para Produção']

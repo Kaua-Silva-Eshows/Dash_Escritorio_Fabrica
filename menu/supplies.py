@@ -457,6 +457,7 @@ def BuildSupplies(companies_, inputsExpenses, purchasesWithoutOrders, bluemeWith
             function_copy_dataframe_as_tsv(itemSold_merged_full)
             
             averageInputN5Price_n5_not_associated = averageInputN5Price_n5_not_associated[averageInputN5Price_n5_not_associated['Insumo de Estoque'].isna()]
+            function_format_number_columns(averageInputN5Price_n5_not_associated, columns_money=['Média Preço (Insumo de Compra)', 'Média Preço (Insumo Estoque)', 'VALOR DRI'], columns_number=['QUANTIDADE DRI'])
             averageInputN5Price_null, len_df = component_plotDataframe_aggrid(averageInputN5Price_n5_not_associated, 'Insumos Sem Associação')
             row_averageInputN5Price_filters = st.columns([1.8,1,1])
             with row_averageInputN5Price_filters[0]:
